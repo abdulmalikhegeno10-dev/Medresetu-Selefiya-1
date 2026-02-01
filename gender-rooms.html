@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👥 የወንድ/ሴት ክፍል - Gender Rooms</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d5f3f;
+            --accent: #d4af37;
+            --male-color: #3182ce;
+            --female-color: #d53f8c;
+            --bg: #0f1419;
+            --card-bg: #1a1f2e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), #1a4a2a);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Gender Selection (for students) */
+        .gender-selection {
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .gender-selection h2 {
+            color: var(--accent);
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .gender-selection p {
+            color: #ccc;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .gender-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .gender-btn {
+            padding: 40px 20px;
+            border: 3px solid transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+            font-weight: bold;
+            background: var(--card-bg);
+        }
+
+        .gender-btn.male {
+            border-color: var(--male-color);
+            color: var(--male-color);
+        }
+
+        .gender-btn.female {
+            border-color: var(--female-color);
+            color: var(--female-color);
+        }
+
+        .gender-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .gender-btn.male:hover {
+            background: linear-gradient(135deg, var(--male-color), #2c5aa0);
+        }
+
+        .gender-btn.female:hover {
+            background: linear-gradient(135deg, var(--female-color), #b83280);
+        }
+
+        .gender-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .gender-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .gender-count {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Dual Rooms Layout (for teacher) */
+        .dual-rooms {
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .dual-rooms.active {
+            display: grid;
+        }
+
+        .room-panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid;
+        }
+
+        .room-panel.male {
+            border-color: var(--male-color);
+        }
+
+        .room-panel.female {
+            border-color: var(--female-color);
+        }
+
+        .room-header {
+            padding: 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .room-header.male {
+            background: linear-gradient(135deg, var(--male-color), #2c5aa0);
+        }
+
+        .room-header.female {
+            background: linear-gradient(135deg, var(--female-color), #b83280);
+        }
+
+        .room-stats {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .room-video {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .room-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .audio-indicator {
+            font-size: 60px;
+            animation: pulse 2s infinite;
+        }
+
+        .participants-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .participant-status {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .room-controls {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #2d3748;
+        }
+
+        .room-control-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .room-control-btn:hover {
+            background: var(--primary);
+        }
+
+        /* Chat Section */
+        .room-chat {
+            padding: 15px;
+            border-top: 1px solid #2d3748;
+        }
+
+        .chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        .chat-message {
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chat-user {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .chat-text {
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #2d3748;
+            border-radius: 20px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Privacy Notice */
+        .privacy-notice {
+            background: rgba(237, 137, 54, 0.2);
+            border: 2px solid #ed8936;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .privacy-notice h3 {
+            color: #ed8936;
+            margin-bottom: 10px;
+        }
+
+        .privacy-notice p {
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
+        }
+
+        @media (max-width: 768px) {
+            .dual-rooms {
+                grid-template-columns: 1fr;
+            }
+            
+            .gender-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="history.back()">◀ ተመለስ</button>
+
+    <div class="header">
+        <h1>🕌 የወንድ እና የሴት የተለየ ትምህርት ክፍል</h1>
+        <p>ኢስላማዊ የመማሪያ ክፍል መለያየት ስርዓት</p>
+    </div>
+
+    <div class="container">
+        <!-- Privacy Notice -->
+        <div class="privacy-notice">
+            <h3>🔒 የግላዊነት ማስታወቂያ</h3>
+            <p>
+                ይህ ስርዓት ለኢስላማዊ ትምህርት የወንድ እና የሴት ተማሪዎች በተለየ መንገድ እንዲማሩ ያስችላል።
+                <br>
+                መምህሩ ሁለቱንም ክፍሎች በአንድ ጊዜ ማስተማር ይችላል ወይም ለእያንዳንዱ የተለየ ትምህርት ይሰጣል።
+                <br>
+                <strong>የእያንዳንዱ ክፍል chat እና participants ለሌላው አይታይም።</strong>
+            </p>
+        </div>
+
+        <!-- Gender Selection (for students) -->
+        <div class="gender-selection" id="genderSelection">
+            <h2>እባክዎ ፆታዎን ይምረጡ</h2>
+            <p>ወደ ትክክለኛው የትምህርት ክፍል ለመግባት</p>
+
+            <div class="gender-buttons">
+                <div class="gender-btn male" onclick="joinRoom('male')">
+                    <div class="gender-icon">👨</div>
+                    <div class="gender-title">የወንዶች ክፍል</div>
+                    <div class="gender-count" id="maleCount">0 ተማሪዎች</div>
+                </div>
+
+                <div class="gender-btn female" onclick="joinRoom('female')">
+                    <div class="gender-icon">👩</div>
+                    <div class="gender-title">የሴቶች ክፍል</div>
+                    <div class="gender-count" id="femaleCount">0 ተማሪዎች</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dual Rooms (for teacher) -->
+        <div class="dual-rooms" id="dualRooms">
+            <!-- Male Room -->
+            <div class="room-panel male">
+                <div class="room-header male">
+                    👨 የወንዶች ክፍል
+                </div>
+
+                <div class="room-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="maleViewers">0</div>
+                        <div class="stat-label">ተማሪዎች</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="maleHands">0</div>
+                        <div class="stat-label">ጥያቄዎች</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="maleMessages">0</div>
+                        <div class="stat-label">መልእክቶች</div>
+                    </div>
+                </div>
+
+                <div class="room-video">
+                    <div class="audio-indicator">🎙️</div>
+                </div>
+
+                <div class="participants-list" id="maleParticipants">
+                    <!-- Male participants will load here -->
+                </div>
+
+                <div class="room-chat">
+                    <div class="chat-messages" id="maleChatMessages">
+                        <!-- Male chat messages -->
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="maleInput" placeholder="መልእክት ወደ ወንዶች...">
+                        <button class="send-btn" onclick="sendToMale()">📤</button>
+                    </div>
+                </div>
+
+                <div class="room-controls">
+                    <button class="room-control-btn" onclick="muteAllMale()">🔇 Mute All</button>
+                    <button class="room-control-btn" onclick="clearMaleChat()">🧹 Clear Chat</button>
+                </div>
+            </div>
+
+            <!-- Female Room -->
+            <div class="room-panel female">
+                <div class="room-header female">
+                    👩 የሴቶች ክፍል
+                </div>
+
+                <div class="room-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="femaleViewers">0</div>
+                        <div class="stat-label">ተማሪዎች</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="femaleHands">0</div>
+                        <div class="stat-label">ጥያቄዎች</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="femaleMessages">0</div>
+                        <div class="stat-label">መልእክቶች</div>
+                    </div>
+                </div>
+
+                <div class="room-video">
+                    <div class="audio-indicator">🎙️</div>
+                </div>
+
+                <div class="participants-list" id="femaleParticipants">
+                    <!-- Female participants will load here -->
+                </div>
+
+                <div class="room-chat">
+                    <div class="chat-messages" id="femaleChatMessages">
+                        <!-- Female chat messages -->
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="femaleInput" placeholder="መልእክት ወደ ሴቶች...">
+                        <button class="send-btn" onclick="sendToFemale()">📤</button>
+                    </div>
+                </div>
+
+                <div class="room-controls">
+                    <button class="room-control-btn" onclick="muteAllFemale()">🔇 Mute All</button>
+                    <button class="room-control-btn" onclick="clearFemaleChat()">🧹 Clear Chat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module">
+        // Get stream ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamId = urlParams.get('stream');
+        let currentUser = null;
+        let userRole = 'student'; // or 'teacher'
+        let maleParticipants = [];
+        let femaleParticipants = [];
+
+        setTimeout(init, 1000);
+
+        function init() {
+            window.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    checkUserRole();
+                }
+            });
+        }
+
+        async function checkUserRole() {
+            // Check if user is teacher
+            const streamRef = window.doc(window.db, 'streams', streamId);
+            const streamDoc = await window.getDoc(streamRef);
+            
+            if (streamDoc.exists()) {
+                const streamData = streamDoc.data();
+                userRole = streamData.teacherId === currentUser.uid ? 'teacher' : 'student';
+                
+                if (userRole === 'teacher') {
+                    showTeacherView();
+                } else {
+                    showStudentView();
+                }
+                
+                listenToRooms();
+            }
+        }
+
+        function showTeacherView() {
+            document.getElementById('genderSelection').style.display = 'none';
+            document.getElementById('dualRooms').classList.add('active');
+        }
+
+        function showStudentView() {
+            document.getElementById('genderSelection').style.display = 'block';
+            document.getElementById('dualRooms').classList.remove('active');
+        }
+
+        async function joinRoom(gender) {
+            // Save gender selection
+            const viewerRef = window.doc(window.db, 'gender-rooms', `${streamId}_${currentUser.uid}`);
+            await window.setDoc(viewerRef, {
+                streamId: streamId,
+                userId: currentUser.uid,
+                userName: 'ተማሪ ' + currentUser.uid.substring(0, 4),
+                gender: gender,
+                joinedAt: window.serverTimestamp()
+            });
+
+            // Redirect to appropriate stream
+            window.location.href = `stream.html?id=${streamId}&room=${gender}`;
+        }
+
+        function listenToRooms() {
+            const roomsRef = window.collection(window.db, 'gender-rooms');
+            const q = window.query(roomsRef, window.where('streamId', '==', streamId));
+
+            window.onSnapshot(q, (snapshot) => {
+                maleParticipants = [];
+                femaleParticipants = [];
+
+                snapshot.forEach((doc) => {
+                    const participant = doc.data();
+                    if (participant.gender === 'male') {
+                        maleParticipants.push(participant);
+                    } else {
+                        femaleParticipants.push(participant);
+                    }
+                });
+
+                updateRoomStats();
+                displayParticipants();
+            });
+
+            // Listen to male chat
+            listenToChat('male');
+            // Listen to female chat
+            listenToChat('female');
+        }
+
+        function updateRoomStats() {
+            document.getElementById('maleCount').textContent = `${maleParticipants.length} ተማሪዎች`;
+            document.getElementById('femaleCount').textContent = `${femaleParticipants.length} ተማሪዎች`;
+            
+            document.getElementById('maleViewers').textContent = maleParticipants.length;
+            document.getElementById('femaleViewers').textContent = femaleParticipants.length;
+        }
+
+        function displayParticipants() {
+            // Male participants
+            const maleList = document.getElementById('maleParticipants');
+            maleList.innerHTML = '';
+            maleParticipants.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'participant';
+                item.innerHTML = `
+                    <div class="participant-avatar">👨</div>
+                    <div class="participant-info">
+                        <div class="participant-name">${p.userName}</div>
+                        <div class="participant-status">በማዳመጥ ላይ</div>
+                    </div>
+                `;
+                maleList.appendChild(item);
+            });
+
+            // Female participants
+            const femaleList = document.getElementById('femaleParticipants');
+            femaleList.innerHTML = '';
+            femaleParticipants.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'participant';
+                item.innerHTML = `
+                    <div class="participant-avatar">👩</div>
+                    <div class="participant-info">
+                        <div class="participant-name">${p.userName}</div>
+                        <div class="participant-status">በማዳመጥ ላይ</div>
+                    </div>
+                `;
+                femaleList.appendChild(item);
+            });
+        }
+
+        function listenToChat(gender) {
+            const messagesRef = window.collection(window.db, 'gender-chat', streamId, gender);
+            const q = window.query(messagesRef, window.orderBy('timestamp', 'asc'));
+
+            window.onSnapshot(q, (snapshot) => {
+                const chatDiv = document.getElementById(gender + 'ChatMessages');
+                
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const msg = change.doc.data();
+                        const msgEl = document.createElement('div');
+                        msgEl.className = 'chat-message';
+                        msgEl.innerHTML = `
+                            <div class="chat-user">${msg.userName}</div>
+                            <div class="chat-text">${msg.message}</div>
+                        `;
+                        chatDiv.appendChild(msgEl);
+                        chatDiv.scrollTop = chatDiv.scrollHeight;
+                    }
+                });
+
+                // Update message count
+                const count = snapshot.size;
+                document.getElementById(gender + 'Messages').textContent = count;
+            });
+        }
+
+        async function sendToMale() {
+            const input = document.getElementById('maleInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            await window.addDoc(window.collection(window.db, 'gender-chat', streamId, 'male'), {
+                userName: 'መምህር',
+                message: message,
+                timestamp: window.serverTimestamp()
+            });
+
+            input.value = '';
+        }
+
+        async function sendToFemale() {
+            const input = document.getElementById('femaleInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            await window.addDoc(window.collection(window.db, 'gender-chat', streamId, 'female'), {
+                userName: 'መምህር',
+                message: message,
+                timestamp: window.serverTimestamp()
+            });
+
+            input.value = '';
+        }
+
+        function muteAllMale() {
+            if (confirm('የወንዶች ክፍል ውስጥ ያሉትን ሁሉ mute ማድረግ ይፈልጋሉ?')) {
+                alert('Mute functionality በቅርቡ ይጨመራል!');
+            }
+        }
+
+        function muteAllFemale() {
+            if (confirm('የሴቶች ክፍል ውስጥ ያሉትን ሁሉ mute ማድረግ ይፈልጋሉ?')) {
+                alert('Mute functionality በቅርቡ ይጨመራል!');
+            }
+        }
+
+        async function clearMaleChat() {
+            if (confirm('የወንዶች chat ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?')) {
+                const messagesRef = window.collection(window.db, 'gender-chat', streamId, 'male');
+                const snapshot = await window.getDocs(messagesRef);
+                
+                snapshot.forEach(async (doc) => {
+                    await window.deleteDoc(doc.ref);
+                });
+            }
+        }
+
+        async function clearFemaleChat() {
+            if (confirm('የሴቶች chat ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?')) {
+                const messagesRef = window.collection(window.db, 'gender-chat', streamId, 'female');
+                const snapshot = await window.getDocs(messagesRef);
+                
+                snapshot.forEach(async (doc) => {
+                    await window.deleteDoc(doc.ref);
+                });
+            }
+        }
+
+        // Global functions
+        window.joinRoom = joinRoom;
+        window.sendToMale = sendToMale;
+        window.sendToFemale = sendToFemale;
+        window.muteAllMale = muteAllMale;
+        window.muteAllFemale = muteAllFemale;
+        window.clearMaleChat = clearMaleChat;
+        window.clearFemaleChat = clearFemaleChat;
+    </script>
+</body>
+</html>
