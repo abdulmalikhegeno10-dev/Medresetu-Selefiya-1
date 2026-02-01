@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👨‍🏫 Advanced Teacher Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d5f3f;
+            --accent: #d4af37;
+            --danger: #e53e3e;
+            --bg: #0f1419;
+            --card-bg: #1a1f2e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            overflow: hidden;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            height: 100vh;
+            gap: 2px;
+            background: #000;
+        }
+
+        /* Left Sidebar - Controls */
+        .controls-sidebar {
+            background: var(--card-bg);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+        }
+
+        .control-section h3 {
+            color: var(--accent);
+            font-size: 14px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, var(--primary), #1a4a2a);
+            color: white;
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(135deg, var(--danger), #c53030);
+            color: white;
+        }
+
+        .control-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Main Video Area */
+        .main-area {
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+
+        .video-container {
+            flex: 1;
+            position: relative;
+            background: #000;
+        }
+
+        #teacherVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .audio-mode {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a3a1a, #0f1419);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .teacher-avatar-large {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            border: 5px solid var(--accent);
+        }
+
+        .live-stats-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-badge {
+            background: rgba(0,0,0,0.8);
+            padding: 10px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .live-badge {
+            background: var(--danger);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .bottom-toolbar {
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .toolbar-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--primary);
+        }
+
+        .toolbar-btn.active {
+            background: var(--primary);
+        }
+
+        .toolbar-btn.danger {
+            background: var(--danger);
+        }
+
+        /* Right Sidebar - Students & Moderation */
+        .students-sidebar {
+            background: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .student-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+        }
+
+        .student-status {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .hand-raised {
+            color: #ed8936;
+            font-size: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        .student-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+        }
+
+        .action-btn.danger:hover {
+            background: var(--danger);
+        }
+
+        /* Questions Queue */
+        .question-item {
+            background: rgba(237, 137, 54, 0.1);
+            border-left: 3px solid #ed8936;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .question-user {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 13px;
+        }
+
+        .question-time {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .question-text {
+            font-size: 13px;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .question-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .question-btn.approve {
+            background: #48bb78;
+            color: white;
+        }
+
+        .question-btn.reject {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            color: var(--accent);
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            
+            .controls-sidebar,
+            .students-sidebar {
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Left Sidebar - Controls -->
+        <div class="controls-sidebar">
+            <h2 style="color: var(--accent); margin-bottom: 20px;">🎛️ የመምህር Control</h2>
+
+            <!-- Stream Settings -->
+            <div class="control-section">
+                <h3>📹 የስርጭት ቅንብር</h3>
+                
+                <div class="toggle-switch">
+                    <span>Video</span>
+                    <label class="switch">
+                        <input type="checkbox" id="videoToggle" checked onchange="toggleVideo()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-switch">
+                    <span>Audio</span>
+                    <label class="switch">
+                        <input type="checkbox" id="audioToggle" checked onchange="toggleAudio()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button class="control-btn secondary" onclick="shareScreen()">
+                    🖥️ Screen Share
+                </button>
+
+                <button class="control-btn secondary" onclick="openWhiteboard()">
+                    📝 Whiteboard
+                </button>
+            </div>
+
+            <!-- Moderation -->
+            <div class="control-section">
+                <h3>🛡️ የረብሻ መቆጣጠሪያ</h3>
+
+                <button class="control-btn secondary" onclick="muteAll()">
+                    🔇 Mute All Students
+                </button>
+
+                <button class="control-btn secondary" onclick="clearChat()">
+                    🧹 Clear Chat
+                </button>
+
+                <div class="toggle-switch">
+                    <span>Chat በማንም ሰው</span>
+                    <label class="switch">
+                        <input type="checkbox" id="chatToggle" checked onchange="toggleChat()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-switch">
+                    <span>Questions Only</span>
+                    <label class="switch">
+                        <input type="checkbox" id="questionsOnlyToggle" onchange="toggleQuestionsOnly()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Gender Rooms -->
+            <div class="control-section">
+                <h3>👥 የወንድ/ሴት ክፍል</h3>
+                
+                <button class="control-btn secondary" onclick="openGenderRooms()">
+                    🚪 የተለየ ክፍል ክፈት
+                </button>
+
+                <button class="control-btn secondary" onclick="viewMaleRoom()">
+                    👨 የወንዶች ክፍል
+                </button>
+
+                <button class="control-btn secondary" onclick="viewFemaleRoom()">
+                    👩 የሴቶች ክፍል
+                </button>
+            </div>
+
+            <!-- Polls & Quizzes -->
+            <div class="control-section">
+                <h3>📊 ምርጫዎች/ጥያቄዎች</h3>
+                
+                <button class="control-btn secondary" onclick="createPoll()">
+                    📊 አዲስ Poll ፍጠር
+                </button>
+
+                <button class="control-btn secondary" onclick="createQuiz()">
+                    ✍️ Quiz ስጥ
+                </button>
+            </div>
+
+            <!-- End Stream -->
+            <div class="control-section">
+                <button class="control-btn danger" onclick="endStream()">
+                    ⏹️ ትምህርት አብቃ
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Video Area -->
+        <div class="main-area">
+            <div class="video-container">
+                <!-- Video Mode -->
+                <video id="teacherVideo" autoplay muted playsinline></video>
+
+                <!-- Audio Mode (hidden by default) -->
+                <div class="audio-mode" id="audioMode" style="display: none;">
+                    <div class="teacher-avatar-large">👨‍🏫</div>
+                    <h2 style="color: var(--accent);">የድምጽ ትምህርት ሁነታ</h2>
+                </div>
+
+                <!-- Stats Overlay -->
+                <div class="live-stats-overlay">
+                    <div class="live-badge">
+                        <span style="width: 10px; height: 10px; background: white; border-radius: 50%;"></span>
+                        LIVE
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="stat-badge">
+                            👥 <span id="viewerCount">0</span>
+                        </div>
+                        <div class="stat-badge">
+                            ⏱️ <span id="duration">00:00</span>
+                        </div>
+                        <div class="stat-badge">
+                            ✋ <span id="handsRaised">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Toolbar -->
+            <div class="bottom-toolbar">
+                <button class="toolbar-btn active" id="videoBtn" onclick="toggleVideoUI()">📹</button>
+                <button class="toolbar-btn active" id="audioBtn" onclick="toggleAudioUI()">🎤</button>
+                <button class="toolbar-btn" onclick="shareScreen()">🖥️</button>
+                <button class="toolbar-btn" onclick="openWhiteboard()">📝</button>
+                <button class="toolbar-btn" onclick="openSettings()">⚙️</button>
+                <button class="toolbar-btn danger" onclick="endStream()">⏹️</button>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Students -->
+        <div class="students-sidebar">
+            <div class="sidebar-tabs">
+                <button class="tab-btn active" onclick="switchTab('students')">👥 ተማሪዎች</button>
+                <button class="tab-btn" onclick="switchTab('questions')">✋ ጥያቄዎች</button>
+            </div>
+
+            <!-- Students Tab -->
+            <div class="tab-content" id="studentsTab">
+                <div style="margin-bottom: 15px;">
+                    <input type="text" placeholder="🔍 Search students..." style="
+                        width: 100%;
+                        padding: 10px;
+                        background: rgba(255,255,255,0.1);
+                        border: 1px solid #2d3748;
+                        border-radius: 8px;
+                        color: white;
+                    ">
+                </div>
+                <div id="studentsList">
+                    <!-- Students will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Questions Tab -->
+            <div class="tab-content" id="questionsTab" style="display: none;">
+                <div id="questionsList">
+                    <!-- Questions will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modalTitle">Confirm Action</h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn" style="background: #888;" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn" style="background: var(--danger); color: white;" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="moderation.js"></script>
+</body>
+</html>
