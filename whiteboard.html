@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Interactive Whiteboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d5f3f;
+            --accent: #d4af37;
+            --bg: #0f1419;
+            --card-bg: #1a1f2e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .whiteboard-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Top Toolbar */
+        .top-toolbar {
+            background: var(--card-bg);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar-title {
+            color: var(--accent);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .toolbar-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--primary);
+        }
+
+        .toolbar-btn.danger {
+            background: #e53e3e;
+        }
+
+        /* Main Canvas Area */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            position: relative;
+            background: #fff;
+        }
+
+        /* Left Sidebar - Tools */
+        .tools-sidebar {
+            width: 80px;
+            background: var(--card-bg);
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-right: 2px solid var(--primary);
+        }
+
+        .tool-btn {
+            width: 60px;
+            height: 60px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tool-btn.active {
+            background: var(--primary);
+            border-color: var(--accent);
+        }
+
+        .tool-separator {
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin: 10px 0;
+        }
+
+        /* Color Picker */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .color-btn {
+            width: 28px;
+            height: 28px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .color-btn.active {
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Size Selector */
+        .size-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .size-btn {
+            width: 60px;
+            height: 40px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .size-btn.active {
+            background: var(--primary);
+            border-color: var(--accent);
+        }
+
+        /* Canvas */
+        #whiteboard {
+            flex: 1;
+            cursor: crosshair;
+            background: white;
+            touch-action: none;
+        }
+
+        /* Right Sidebar - Chat/Viewers */
+        .right-sidebar {
+            width: 300px;
+            background: var(--card-bg);
+            border-left: 2px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .viewer-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .viewer-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .viewer-name {
+            font-size: 13px;
+            color: white;
+        }
+
+        /* Text Input Modal */
+        .text-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            z-index: 1000;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .text-modal.active {
+            display: block;
+        }
+
+        .text-modal h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .text-modal input {
+            width: 300px;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #2d3748;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .text-modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Bottom Status Bar */
+        .status-bar {
+            background: var(--card-bg);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid var(--primary);
+            font-size: 13px;
+            color: #888;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tools-sidebar {
+                width: 60px;
+            }
+            
+            .tool-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .right-sidebar {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="whiteboard-container">
+        <!-- Top Toolbar -->
+        <div class="top-toolbar">
+            <div class="toolbar-left">
+                <div class="toolbar-title">📝 Interactive Whiteboard</div>
+                <span style="color: #888; font-size: 12px;">👁️ <span id="viewersCount">0</span> watching</span>
+            </div>
+            <div class="toolbar-right">
+                <button class="toolbar-btn" onclick="saveBoard()">💾 Save</button>
+                <button class="toolbar-btn" onclick="shareBoard()">📤 Share</button>
+                <button class="toolbar-btn danger" onclick="clearBoard()">🗑️ Clear</button>
+                <button class="toolbar-btn" onclick="closeWhiteboard()">✕ Close</button>
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="canvas-area">
+            <!-- Left Sidebar - Tools -->
+            <div class="tools-sidebar">
+                <button class="tool-btn active" data-tool="pen" onclick="selectTool('pen')" title="Pen">
+                    ✏️
+                </button>
+                <button class="tool-btn" data-tool="marker" onclick="selectTool('marker')" title="Marker">
+                    🖊️
+                </button>
+                <button class="tool-btn" data-tool="eraser" onclick="selectTool('eraser')" title="Eraser">
+                    🧹
+                </button>
+                <button class="tool-btn" data-tool="text" onclick="selectTool('text')" title="Text">
+                    📝
+                </button>
+                
+                <div class="tool-separator"></div>
+                
+                <button class="tool-btn" data-tool="line" onclick="selectTool('line')" title="Line">
+                    📏
+                </button>
+                <button class="tool-btn" data-tool="arrow" onclick="selectTool('arrow')" title="Arrow">
+                    ➡️
+                </button>
+                <button class="tool-btn" data-tool="rectangle" onclick="selectTool('rectangle')" title="Rectangle">
+                    ▭
+                </button>
+                <button class="tool-btn" data-tool="circle" onclick="selectTool('circle')" title="Circle">
+                    ⭕
+                </button>
+
+                <div class="tool-separator"></div>
+
+                <!-- Colors -->
+                <div class="color-palette">
+                    <div class="color-btn active" style="background: #000;" data-color="#000" onclick="selectColor('#000')"></div>
+                    <div class="color-btn" style="background: #e53e3e;" data-color="#e53e3e" onclick="selectColor('#e53e3e')"></div>
+                    <div class="color-btn" style="background: #3182ce;" data-color="#3182ce" onclick="selectColor('#3182ce')"></div>
+                    <div class="color-btn" style="background: #38a169;" data-color="#38a169" onclick="selectColor('#38a169')"></div>
+                    <div class="color-btn" style="background: #d4af37;" data-color="#d4af37" onclick="selectColor('#d4af37')"></div>
+                    <div class="color-btn" style="background: #9f7aea;" data-color="#9f7aea" onclick="selectColor('#9f7aea')"></div>
+                </div>
+
+                <div class="tool-separator"></div>
+
+                <!-- Sizes -->
+                <div class="size-selector">
+                    <div class="size-btn" data-size="2" onclick="selectSize(2)">
+                        <div style="width: 2px; height: 2px; background: white; border-radius: 50%;"></div>
+                    </div>
+                    <div class="size-btn active" data-size="5" onclick="selectSize(5)">
+                        <div style="width: 5px; height: 5px; background: white; border-radius: 50%;"></div>
+                    </div>
+                    <div class="size-btn" data-size="10" onclick="selectSize(10)">
+                        <div style="width: 10px; height: 10px; background: white; border-radius: 50%;"></div>
+                    </div>
+                    <div class="size-btn" data-size="20" onclick="selectSize(20)">
+                        <div style="width: 15px; height: 15px; background: white; border-radius: 50%;"></div>
+                    </div>
+                </div>
+
+                <div class="tool-separator"></div>
+
+                <button class="tool-btn" onclick="undo()" title="Undo">
+                    ↶
+                </button>
+                <button class="tool-btn" onclick="redo()" title="Redo">
+                    ↷
+                </button>
+            </div>
+
+            <!-- Canvas -->
+            <canvas id="whiteboard"></canvas>
+
+            <!-- Right Sidebar -->
+            <div class="right-sidebar">
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" onclick="switchTab('viewers')">👥 Viewers</button>
+                    <button class="tab-btn" onclick="switchTab('chat')">💬 Chat</button>
+                </div>
+
+                <div class="tab-content" id="viewersTab">
+                    <div id="viewersList">
+                        <!-- Viewers will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="chatTab" style="display: none;">
+                    <div style="color: #888; text-align: center; padding: 20px;">
+                        Chat በቅርቡ ይጨመራል
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span>Tool: <strong id="currentTool">Pen</strong></span>
+            </div>
+            <div class="status-item">
+                <span>Color: <span id="currentColor" style="display: inline-block; width: 15px; height: 15px; background: #000; border-radius: 50%; vertical-align: middle;"></span></span>
+            </div>
+            <div class="status-item">
+                <span>Size: <strong id="currentSize">5px</strong></span>
+            </div>
+            <div class="status-item">
+                <span>🔒 Auto-saving...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Input Modal -->
+    <div class="text-modal" id="textModal">
+        <h3>Add Text</h3>
+        <input type="text" id="textInput" placeholder="Type your text here...">
+        <div class="text-modal-buttons">
+            <button class="modal-btn" style="background: #888;" onclick="closeTextModal()">Cancel</button>
+            <button class="modal-btn" style="background: var(--primary); color: white;" onclick="addText()">Add</button>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script>
+        // Canvas Setup
+        const canvas = document.getElementById('whiteboard');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            redrawCanvas();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Drawing State
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#000';
+        let currentSize = 5;
+        let startX, startY;
+        
+        // History for undo/redo
+        let drawingHistory = [];
+        let historyStep = -1;
+
+        // Drawing Functions
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch support
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleTouch);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            
+            if (currentTool === 'pen' || currentTool === 'marker' || currentTool === 'eraser') {
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+            } else if (currentTool === 'text') {
+                showTextModal(startX, startY);
+            }
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            ctx.lineWidth = currentSize;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            if (currentTool === 'pen') {
+                ctx.strokeStyle = currentColor;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            } else if (currentTool === 'marker') {
+                ctx.strokeStyle = currentColor;
+                ctx.globalAlpha = 0.5;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            } else if (currentTool === 'eraser') {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.globalCompositeOperation = 'source-over';
+            }
+        }
+
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                saveToHistory();
+            }
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                             e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        // Tool Selection
+        function selectTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
+            document.getElementById('currentTool').textContent = tool.charAt(0).toUpperCase() + tool.slice(1);
+        }
+
+        function selectColor(color) {
+            currentColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-color="${color}"]`).classList.add('active');
+            document.getElementById('currentColor').style.background = color;
+        }
+
+        function selectSize(size) {
+            currentSize = size;
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-size="${size}"]`).classList.add('active');
+            document.getElementById('currentSize').textContent = size + 'px';
+        }
+
+        // Text Modal
+        let textX, textY;
+        function showTextModal(x, y) {
+            textX = x;
+            textY = y;
+            document.getElementById('textModal').classList.add('active');
+            document.getElementById('textInput').focus();
+        }
+
+        function closeTextModal() {
+            document.getElementById('textModal').classList.remove('active');
+            document.getElementById('textInput').value = '';
+        }
+
+        function addText() {
+            const text = document.getElementById('textInput').value;
+            if (text) {
+                ctx.font = `${currentSize * 4}px Arial`;
+                ctx.fillStyle = currentColor;
+                ctx.fillText(text, textX, textY);
+                saveToHistory();
+            }
+            closeTextModal();
+        }
+
+        // History Management
+        function saveToHistory() {
+            historyStep++;
+            if (historyStep < drawingHistory.length) {
+                drawingHistory.length = historyStep;
+            }
+            drawingHistory.push(canvas.toDataURL());
+        }
+
+        function undo() {
+            if (historyStep > 0) {
+                historyStep--;
+                redrawCanvas();
+            }
+        }
+
+        function redo() {
+            if (historyStep < drawingHistory.length - 1) {
+                historyStep++;
+                redrawCanvas();
+            }
+        }
+
+        function redrawCanvas() {
+            if (historyStep >= 0 && drawingHistory[historyStep]) {
+                const img = new Image();
+                img.src = drawingHistory[historyStep];
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+            }
+        }
+
+        // Board Actions
+        function clearBoard() {
+            if (confirm('Whiteboard ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?')) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                saveToHistory();
+            }
+        }
+
+        function saveBoard() {
+            const link = document.createElement('a');
+            link.download = 'whiteboard_' + Date.now() + '.png';
+            link.href = canvas.toDataURL();
+            link.click();
+            alert('✅ Whiteboard saved!');
+        }
+
+        function shareBoard() {
+            alert('Share feature በቅርቡ ይጨመራል!');
+        }
+
+        function closeWhiteboard() {
+            if (confirm('Whiteboard መዝጋት ይፈልጋሉ?')) {
+                window.close();
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('viewersTab').style.display = tab === 'viewers' ? 'block' : 'none';
+            document.getElementById('chatTab').style.display = tab === 'chat' ? 'block' : 'none';
+        }
+
+        // Initialize
+        saveToHistory();
+
+        // Global functions
+        window.selectTool = selectTool;
+        window.selectColor = selectColor;
+        window.selectSize = selectSize;
+        window.undo = undo;
+        window.redo = redo;
+        window.clearBoard = clearBoard;
+        window.saveBoard = saveBoard;
+        window.shareBoard = shareBoard;
+        window.closeWhiteboard = closeWhiteboard;
+        window.closeTextModal = closeTextModal;
+        window.addText = addText;
+        window.switchTab = switchTab;
+    </script>
+</body>
+</html>
