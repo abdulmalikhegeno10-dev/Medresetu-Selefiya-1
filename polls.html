@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Polls & Quizzes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d5f3f;
+            --accent: #d4af37;
+            --bg: #0f1419;
+            --card-bg: #1a1f2e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), #1a4a2a);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Create Poll Section */
+        .create-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .create-section h2 {
+            color: var(--accent);
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #2d3748;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .option-input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #2d3748;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .remove-option-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #e53e3e;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .add-option-btn {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .add-option-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .create-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), #1a4a2a);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 95, 63, 0.4);
+        }
+
+        /* Active Polls/Quizzes */
+        .active-items {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+        }
+
+        .active-items h2 {
+            color: var(--accent);
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .items-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .item-card {
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .item-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .item-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .item-status.live {
+            background: #48bb78;
+            color: white;
+        }
+
+        .item-status.ended {
+            background: #888;
+            color: white;
+        }
+
+        /* Poll Options & Results */
+        .poll-options {
+            margin: 20px 0;
+        }
+
+        .poll-option {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .poll-option-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            opacity: 0.3;
+            transition: width 0.5s;
+        }
+
+        .poll-option-content {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .poll-option-text {
+            font-size: 15px;
+            color: white;
+        }
+
+        .poll-option-votes {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #2d3748;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .action-btn.view {
+            background: var(--primary);
+            color: white;
+        }
+
+        .action-btn.end {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: rgba(255,255,255,0.1);
+            color: #888;
+        }
+
+        /* Quiz Questions */
+        .quiz-questions {
+            margin-top: 20px;
+        }
+
+        .question-item {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .question-number {
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .question-option {
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .question-option:hover {
+            border-color: var(--primary);
+        }
+
+        .question-option.correct {
+            border-color: #48bb78;
+            background: rgba(72, 187, 120, 0.1);
+        }
+
+        .question-option.wrong {
+            border-color: #e53e3e;
+            background: rgba(229, 62, 62, 0.1);
+        }
+
+        .correct-answer-label {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #48bb78;
+            border-radius: 5px;
+            font-size: 10px;
+            margin-left: 10px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--primary);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="history.back()">◀ ተመለስ</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>📊 Polls & Quizzes Dashboard</h1>
+            <p>የምርጫዎች እና ፈተናዎች አስተዳደር ስርዓት</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPolls">0</div>
+                <div class="stat-label">Total Polls</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activePolls">0</div>
+                <div class="stat-label">Active Polls</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalVotes">0</div>
+                <div class="stat-label">Total Votes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalQuizzes">0</div>
+                <div class="stat-label">Total Quizzes</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchMainTab('polls')">📊 Polls</button>
+            <button class="tab-btn" onclick="switchMainTab('quizzes')">✍️ Quizzes</button>
+        </div>
+
+        <!-- POLLS TAB -->
+        <div class="tab-content active" id="pollsTab">
+            <!-- Create New Poll -->
+            <div class="create-section">
+                <h2>📊 አዲስ Poll ፍጠር</h2>
+
+                <div class="form-group">
+                    <label>ጥያቄ *</label>
+                    <input type="text" id="pollQuestion" placeholder="ለምሳሌ: የትኛው ሱራ ነው በጣም የምትወዱት?">
+                </div>
+
+                <div class="form-group">
+                    <label>አማራጮች *</label>
+                    <div class="options-list" id="pollOptionsList">
+                        <div class="option-item">
+                            <input type="text" class="option-input" placeholder="አማራጭ 1">
+                            <button class="remove-option-btn" onclick="removeOption(this)">✕</button>
+                        </div>
+                        <div class="option-item">
+                            <input type="text" class="option-input" placeholder="አማራጭ 2">
+                            <button class="remove-option-btn" onclick="removeOption(this)">✕</button>
+                        </div>
+                    </div>
+                    <button class="add-option-btn" onclick="addPollOption()">+ አማራጭ ጨምር</button>
+                </div>
+
+                <button class="create-btn" onclick="createPoll()">
+                    📤 Poll ለተማሪዎች ላክ
+                </button>
+            </div>
+
+            <!-- Active Polls -->
+            <div class="active-items">
+                <h2>🔴 Active Polls</h2>
+                <div class="items-grid" id="activePollsList">
+                    <div style="text-align: center; color: #888; padding: 40px;">
+                        ምንም active poll የለም። አዲስ poll ይፍጠሩ!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZZES TAB -->
+        <div class="tab-content" id="quizzesTab">
+            <!-- Create New Quiz -->
+            <div class="create-section">
+                <h2>✍️ አዲስ Quiz ፍጠር</h2>
+
+                <div class="form-group">
+                    <label>የQuiz ርዕስ *</label>
+                    <input type="text" id="quizTitle" placeholder="ለምሳሌ: የሱራ አል-ባቃራህ ፈተና">
+                </div>
+
+                <div class="form-group">
+                    <label>መግለጫ</label>
+                    <textarea id="quizDescription" rows="3" placeholder="ስለ ፈተናው አጭር መግለጫ..."></textarea>
+                </div>
+
+                <div class="quiz-questions" id="quizQuestionsList">
+                    <!-- Questions will be added here -->
+                </div>
+
+                <button class="add-option-btn" onclick="addQuizQuestion()">+ ጥያቄ ጨምር</button>
+
+                <button class="create-btn" onclick="createQuiz()">
+                    📤 Quiz ለተማሪዎች ላክ
+                </button>
+            </div>
+
+            <!-- Active Quizzes -->
+            <div class="active-items">
+                <h2>🔴 Active Quizzes</h2>
+                <div class="items-grid" id="activeQuizzesList">
+                    <div style="text-align: center; color: #888; padding: 40px;">
+                        ምንም active quiz የለም። አዲስ quiz ይፍጠሩ!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module">
+        const urlParams = new URLSearchParams(window.location.search);
+        const streamId = urlParams.get('stream');
+        let currentUser = null;
+        let polls = [];
+        let quizzes = [];
+        let quizQuestionCount = 0;
+
+        setTimeout(init, 1000);
+
+        function init() {
+            window.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    loadPolls();
+                    loadQuizzes();
+                }
+            });
+        }
+
+        // POLLS
+        async function createPoll() {
+            const question = document.getElementById('pollQuestion').value.trim();
+            const optionInputs = document.querySelectorAll('#pollOptionsList .option-input');
+            const options = Array.from(optionInputs)
+                .map(input => input.value.trim())
+                .filter(val => val);
+
+            if (!question || options.length < 2) {
+                alert('እባክዎ ጥያቄ እና ቢያንስ 2 አማራጮች ያስገቡ!');
+                return;
+            }
+
+            const pollData = {
+                streamId: streamId,
+                question: question,
+                options: options.map(opt => ({ text: opt, votes: 0 })),
+                totalVotes: 0,
+                isActive: true,
+                createdAt: window.serverTimestamp(),
+                createdBy: currentUser.uid
+            };
+
+            try {
+                await window.addDoc(window.collection(window.db, 'polls'), pollData);
+                alert('✅ Poll ተፈጥሯል እና ለተማሪዎች ተልኳል!');
+                
+                // Clear form
+                document.getElementById('pollQuestion').value = '';
+                document.querySelectorAll('#pollOptionsList .option-input').forEach(input => input.value = '');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ስህተት: ' + error.message);
+            }
+        }
+
+        function loadPolls() {
+            const pollsRef = window.collection(window.db, 'polls');
+            const q = window.query(
+                pollsRef,
+                window.where('streamId', '==', streamId),
+                window.orderBy('createdAt', 'desc')
+            );
+
+            window.onSnapshot(q, (snapshot) => {
+                polls = [];
+                let activeCount = 0;
+                let totalVotes = 0;
+
+                snapshot.forEach((doc) => {
+                    const poll = { id: doc.id, ...doc.data() };
+                    polls.push(poll);
+                    if (poll.isActive) activeCount++;
+                    totalVotes += poll.totalVotes || 0;
+                });
+
+                document.getElementById('totalPolls').textContent = polls.length;
+                document.getElementById('activePolls').textContent = activeCount;
+                document.getElementById('totalVotes').textContent = totalVotes;
+
+                displayPolls();
+            });
+        }
+
+        function displayPolls() {
+            const container = document.getElementById('activePollsList');
+            
+            if (polls.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">ምንም poll የለም። አዲስ poll ይፍጠሩ!</div>';
+                return;
+            }
+
+            container.innerHTML = polls.map(poll => `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">${poll.question}</div>
+                            <div class="item-meta">
+                                <span>👥 ${poll.totalVotes || 0} votes</span>
+                                <span>📅 ${getTimeAgo(poll.createdAt)}</span>
+                            </div>
+                        </div>
+                        <div class="item-status ${poll.isActive ? 'live' : 'ended'}">
+                            ${poll.isActive ? 'LIVE' : 'ENDED'}
+                        </div>
+                    </div>
+
+                    <div class="poll-options">
+                        ${poll.options.map((opt, i) => {
+                            const percentage = poll.totalVotes > 0 
+                                ? Math.round((opt.votes / poll.totalVotes) * 100) 
+                                : 0;
+                            return `
+                                <div class="poll-option">
+                                    <div class="poll-option-bar" style="width: ${percentage}%"></div>
+                                    <div class="poll-option-content">
+                                        <span class="poll-option-text">${opt.text}</span>
+                                        <span class="poll-option-votes">${opt.votes} (${percentage}%)</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="item-actions">
+                        ${poll.isActive ? `
+                            <button class="action-btn end" onclick="endPoll('${poll.id}')">⏹️ End Poll</button>
+                        ` : ''}
+                        <button class="action-btn delete" onclick="deletePoll('${poll.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function endPoll(pollId) {
+            if (confirm('Poll ማብቃት ይፈልጋሉ?')) {
+                await window.updateDoc(window.doc(window.db, 'polls', pollId), {
+                    isActive: false
+                });
+            }
+        }
+
+        async function deletePoll(pollId) {
+            if (confirm('Poll ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?')) {
+                await window.deleteDoc(window.doc(window.db, 'polls', pollId));
+            }
+        }
+
+        // QUIZZES
+        async function createQuiz() {
+            const title = document.getElementById('quizTitle').value.trim();
+            const description = document.getElementById('quizDescription').value.trim();
+            
+            const questionElements = document.querySelectorAll('.question-item');
+            const questions = [];
+
+            questionElements.forEach((qEl) => {
+                const qText = qEl.querySelector('.question-input').value.trim();
+                const options = Array.from(qEl.querySelectorAll('.quiz-option-input'))
+                    .map(input => input.value.trim())
+                    .filter(val => val);
+                const correctIndex = parseInt(qEl.querySelector('.correct-select').value);
+
+                if (qText && options.length >= 2) {
+                    questions.push({
+                        question: qText,
+                        options: options,
+                        correctAnswer: correctIndex
+                    });
+                }
+            });
+
+            if (!title || questions.length === 0) {
+                alert('እባክዎ ርዕስ እና ቢያንስ 1 ጥያቄ ያስገቡ!');
+                return;
+            }
+
+            const quizData = {
+                streamId: streamId,
+                title: title,
+                description: description,
+                questions: questions,
+                submissions: 0,
+                isActive: true,
+                createdAt: window.serverTimestamp(),
+                createdBy: currentUser.uid
+            };
+
+            try {
+                await window.addDoc(window.collection(window.db, 'quizzes'), quizData);
+                alert('✅ Quiz ተፈጥሯል እና ለተማሪዎች ተልኳል!');
+                
+                // Clear form
+                document.getElementById('quizTitle').value = '';
+                document.getElementById('quizDescription').value = '';
+                document.getElementById('quizQuestionsList').innerHTML = '';
+                quizQuestionCount = 0;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('ስህተት: ' + error.message);
+            }
+        }
+
+        function loadQuizzes() {
+            const quizzesRef = window.collection(window.db, 'quizzes');
+            const q = window.query(
+                quizzesRef,
+                window.where('streamId', '==', streamId),
+                window.orderBy('createdAt', 'desc')
+            );
+
+            window.onSnapshot(q, (snapshot) => {
+                quizzes = [];
+
+                snapshot.forEach((doc) => {
+                    quizzes.push({ id: doc.id, ...doc.data() });
+                });
+
+                document.getElementById('totalQuizzes').textContent = quizzes.length;
+                displayQuizzes();
+            });
+        }
+
+        function displayQuizzes() {
+            const container = document.getElementById('activeQuizzesList');
+            
+            if (quizzes.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">ምንም quiz የለም። አዲስ quiz ይፍጠሩ!</div>';
+                return;
+            }
+
+            container.innerHTML = quizzes.map(quiz => `
+                <div class="item-card">
+                    <div class="item-header">
+                        <div>
+                            <div class="item-title">${quiz.title}</div>
+                            <div class="item-meta">
+                                <span>❓ ${quiz.questions.length} questions</span>
+                                <span>📝 ${quiz.submissions || 0} submissions</span>
+                            </div>
+                        </div>
+                        <div class="item-status ${quiz.isActive ? 'live' : 'ended'}">
+                            ${quiz.isActive ? 'LIVE' : 'ENDED'}
+                        </div>
+                    </div>
+
+                    ${quiz.description ? `<p style="color: #ccc; margin: 15px 0;">${quiz.description}</p>` : ''}
+
+                    <div class="item-actions">
+                        ${quiz.isActive ? `
+                            <button class="action-btn end" onclick="endQuiz('${quiz.id}')">⏹️ End Quiz</button>
+                        ` : ''}
+                        <button class="action-btn view" onclick="viewResults('${quiz.id}')">📊 View Results</button>
+                        <button class="action-btn delete" onclick="deleteQuiz('${quiz.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function endQuiz(quizId) {
+            if (confirm('Quiz ማብቃት ይፈልጋሉ?')) {
+                await window.updateDoc(window.doc(window.db, 'quizzes', quizId), {
+                    isActive: false
+                });
+            }
+        }
+
+        async function deleteQuiz(quizId) {
+            if (confirm('Quiz ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?')) {
+                await window.deleteDoc(window.doc(window.db, 'quizzes', quizId));
+            }
+        }
+
+        function viewResults(quizId) {
+            alert('የQuiz ውጤቶች በቅርቡ ይታያሉ!');
+        }
+
+        // UI Functions
+        function addPollOption() {
+            const container = document.getElementById('pollOptionsList');
+            const optionNum = container.children.length + 1;
+            
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.innerHTML = `
+                <input type="text" class="option-input" placeholder="አማራጭ ${optionNum}">
+                <button class="remove-option-btn" onclick="removeOption(this)">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeOption(btn) {
+            if (document.querySelectorAll('#pollOptionsList .option-item').length > 2) {
+                btn.parentElement.remove();
+            } else {
+                alert('ቢያንስ 2 አማራጮች ያስፈልጋሉ!');
+            }
+        }
+
+        function addQuizQuestion() {
+            quizQuestionCount++;
+            const container = document.getElementById('quizQuestionsList');
+            
+            const div = document.createElement('div');
+            div.className = 'question-item';
+            div.innerHTML = `
+                <div class="question-number">ጥያቄ ${quizQuestionCount}</div>
+                <input type="text" class="question-input" placeholder="ጥያቄውን ያስገቡ..." style="
+                    width: 100%;
+                    padding: 12px;
+                    background: rgba(255,255,255,0.1);
+                    border: 2px solid #2d3748;
+                    border-radius: 10px;
+                    color: white;
+                    margin-bottom: 15px;
+                ">
+                
+                <div class="question-options">
+                    <input type="text" class="quiz-option-input" placeholder="አማራጭ A" style="
+                        width: 100%;
+                        padding: 10px;
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid #2d3748;
+                        border-radius: 8px;
+                        color: white;
+                        margin-bottom: 8px;
+                    ">
+                    <input type="text" class="quiz-option-input" placeholder="አማራጭ B" style="
+                        width: 100%;
+                        padding: 10px;
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid #2d3748;
+                        border-radius: 8px;
+                        color: white;
+                        margin-bottom: 8px;
+                    ">
+                    <input type="text" class="quiz-option-input" placeholder="አማራጭ C" style="
+                        width: 100%;
+                        padding: 10px;
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid #2d3748;
+                        border-radius: 8px;
+                        color: white;
+                        margin-bottom: 8px;
+                    ">
+                    <input type="text" class="quiz-option-input" placeholder="አማራጭ D" style="
+                        width: 100%;
+                        padding: 10px;
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid #2d3748;
+                        border-radius: 8px;
+                        color: white;
+                        margin-bottom: 15px;
+                    ">
+                </div>
+
+                <label style="color: var(--accent); font-size: 14px; margin-bottom: 8px; display: block;">
+                    ትክክለኛው መልስ:
+                </label>
+                <select class="correct-select" style="
+                    width: 100%;
+                    padding: 10px;
+                    background: rgba(255,255,255,0.1);
+                    border: 2px solid #2d3748;
+                    border-radius: 8px;
+                    color: white;
+                    margin-bottom: 10px;
+                ">
+                    <option value="0">A</option>
+                    <option value="1">B</option>
+                    <option value="2">C</option>
+                    <option value="3">D</option>
+                </select>
+
+                <button onclick="removeQuestion(this)" style="
+                    width: 100%;
+                    padding: 10px;
+                    background: #e53e3e;
+                    border: none;
+                    border-radius: 8px;
+                    color: white;
+                    cursor: pointer;
+                    margin-top: 10px;
+                ">🗑️ ጥያቄ ሰርዝ</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeQuestion(btn) {
+            btn.parentElement.remove();
+        }
+
+        function switchMainTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('pollsTab').classList.toggle('active', tab === 'polls');
+            document.getElementById('quizzesTab').classList.toggle('active', tab === 'quizzes');
+        }
+
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'አሁን';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'አሁን';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' ደቂቃ በፊት';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' ሰዓት በፊት';
+            return Math.floor(seconds / 86400) + ' ቀን በፊት';
+        }
+
+        // Global functions
+        window.createPoll = createPoll;
+        window.addPollOption = addPollOption;
+        window.removeOption = removeOption;
+        window.endPoll = endPoll;
+        window.deletePoll = deletePoll;
+        window.createQuiz = createQuiz;
+        window.addQuizQuestion = addQuizQuestion;
+        window.removeQuestion = removeQuestion;
+        window.endQuiz = endQuiz;
+        window.deleteQuiz = deleteQuiz;
+        window.viewResults = viewResults;
+        window.switchMainTab = switchMainTab;
+    </script>
+</body>
+</html>
