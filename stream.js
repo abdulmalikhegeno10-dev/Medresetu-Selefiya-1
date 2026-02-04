@@ -186,3 +186,44 @@ window.addEventListener('beforeunload', async () => {
         console.error('Error removing viewer:', error);
     }
 });
+
+// በstream.js ውስጥ addViewer() function አረጋግጥ:
+
+async function addViewer() {
+    try {
+        const viewerRef = window.doc(window.db, 'viewers', `${streamId}_${currentUser.uid}`);
+        await window.setDoc(viewerRef, {
+            streamId: streamId,
+            userId: currentUser.uid,
+            userName: 'ተማሪ ' + currentUser.uid.substring(0, 4),
+            joinedAt: window.serverTimestamp()
+        });
+
+        const streamRef = window.doc(window.db, 'streams', streamId);
+        await window.updateDoc(streamRef, {
+            viewers: window.increment(1)
+        });
+        
+        console.log('✅ Viewer added!'); // Add this for debugging
+    } catch (error) {
+        console.error('❌ Error adding viewer:', error);
+    }
+}
+
+// When new message arrives
+function addMessageToChat(msg) {
+    const chatDiv = document.getElementById('chatMessages');
+    const messageEl = document.createElement('div');
+    messageEl.className = 'chat-message';
+    messageEl.innerHTML = `
+        <div class="chat-user">${msg.userName}</div>
+        <div class="chat-text">${msg.message}</div>
+    `;
+    chatDiv.appendChild(messageEl);
+    chatDiv.scrollTop = chatDiv.scrollHeight;
+    
+    // Play sound notification
+    if (window.notificationManager) {
+        window.notificationManager.playSound('message');
+    }
+}
