@@ -3,66 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌙 ኢስላማዊ የቀጥታ ስርጭት</title>
+    <title>🕌 መድረሰቱ ሰለፊያ - የኢስላም የቀጥታ ትምህርት</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
-            <h1>🕌 ኢስላማዊ የቀጥታ ትምህርት</h1>
-            <p class="tagline">መምህራንን በቀጥታ ተከታተል</p>
-        </header>
-
-        <!-- Prayer Time Widget -->
-        <div class="prayer-widget" id="prayerWidget">
-            <span class="next-prayer">የሚቀጥለው ሰላት: <strong id="nextPrayer">...</strong></span>
-            <span class="prayer-time" id="prayerTime">...</span>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="logo">
+                <h1>🕌 መድረሰቱ ሰለፊያ</h1>
+                <p>የኢስላም የቀጥታ ትምህርት መድረክ</p>
+            </div>
+            <nav class="main-nav">
+                <a href="#live">በቀጥታ</a>
+                <a href="#upcoming">ወደፊት</a>
+                <a href="#categories">ምድቦች</a>
+            </nav>
         </div>
+    </header>
 
-        <!-- Teacher Dashboard Button -->
-        <div class="action-buttons">
-            <button class="btn-primary" onclick="location.href='teacher.html'">
-                🎥 መምህር ነኝ - Live መጀመር
-            </button>
-        </div>
-
-        <!-- Live Streams Section -->
-        <div class="section">
-            <h2>🔴 በቀጥታ ላይ ያሉ ትምህርቶች</h2>
-            <div id="liveStreams" class="streams-grid">
-                <div class="loading">Loading streams...</div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>ከየትኛውም ቦታ የእስልምና ትምህርት ይማሩ</h2>
+            <p>በቀጥታ የሚተላለፉ የቁርአን፣ ሃዲስ፣ ፍቅህ እና ሴራህ ትምህርቶች</p>
+            <div class="cta-buttons">
+                <button class="btn-primary" onclick="location.href='teacher-advanced.html'">
+                    🎥 መምህር ነኝ - Live መጀመር
+                </button>
+                <button class="btn-secondary" onclick="scrollToLive()">
+                    📺 ትምህርቶችን ይመልከቱ
+                </button>
             </div>
         </div>
+    </section>
 
-        <!-- Upcoming Streams -->
-        <div class="section">
-            <h2>📅 በቅርቡ የሚመጡ ትምህርቶች</h2>
-            <div id="upcomingStreams" class="streams-grid">
-                <div class="loading">Loading...</div>
+    <!-- Prayer Times Widget -->
+    <section class="prayer-times">
+        <div class="container">
+            <div class="prayer-widget">
+                <h3>⏰ የሚቀጥለው ሰላት</h3>
+                <div class="prayer-info">
+                    <div class="prayer-name" id="nextPrayer">ፋጅር</div>
+                    <div class="prayer-time" id="prayerTime">በ 2 ሰዓት 30 ደቂቃ</div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <!-- Categories -->
-        <div class="categories">
-            <button class="category active" data-cat="all">🌟 ሁሉም</button>
-            <button class="category" data-cat="quran">📖 ቁርአን</button>
-            <button class="category" data-cat="hadith">📚 ሃዲስ</button>
-            <button class="category" data-cat="fiqh">⚖️ ፍቅህ</button>
-            <button class="category" data-cat="seerah">👤 ሴራህ</button>
+    <!-- Categories Filter -->
+    <section class="categories-section" id="categories">
+        <div class="container">
+            <h2>የትምህርት ምድቦች</h2>
+            <div class="category-filters">
+                <button class="category active" data-cat="all">🌟 ሁሉም</button>
+                <button class="category" data-cat="quran">📖 ቁርአን</button>
+                <button class="category" data-cat="hadith">📚 ሃዲስ</button>
+                <button class="category" data-cat="fiqh">⚖️ ፍቅህ</button>
+                <button class="category" data-cat="seerah">👤 ሴራህ</button>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Firebase -->
+    <!-- Live Streams -->
+    <section class="streams-section" id="live">
+        <div class="container">
+            <h2>🔴 አሁን በቀጥታ</h2>
+            <div class="streams-grid" id="liveStreams">
+                <div class="loading">በቀጥታ ትምህርቶችን በመጫን ላይ...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upcoming Streams -->
+    <section class="streams-section" id="upcoming">
+        <div class="container">
+            <h2>📅 ወደፊት የሚቀርቡ</h2>
+            <div class="streams-grid" id="upcomingStreams">
+                <div class="loading">የወደፊት ትምህርቶችን በመጫን ላይ...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Test Section (Remove in production) -->
+    <section class="test-section" style="background: rgba(237, 137, 54, 0.1); padding: 30px; margin: 30px 0; border-radius: 20px; border: 2px solid #ed8936;">
+        <div class="container">
+            <h2 style="color: #ed8936; margin-bottom: 20px;">🧪 Testing Tools</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <button onclick="testGenderRooms()" class="btn-secondary">
+                    🚪 Test Gender Rooms
+                </button>
+                <button onclick="testVoiceClub()" class="btn-secondary">
+                    🎙️ Test Voice Club
+                </button>
+                <button onclick="testWhiteboard()" class="btn-secondary">
+                    📝 Test Whiteboard
+                </button>
+                <button onclick="testPolls()" class="btn-secondary">
+                    📊 Test Polls
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>መድረሰቱ ሰለፊያ</h3>
+                    <p>በቴክኖሎጂ የኢስላም ትምህርትን ማቅረብ</p>
+                </div>
+                <div class="footer-section">
+                    <h3>አገናኞች</h3>
+                    <ul>
+                        <li><a href="#live">በቀጥታ ትምህርቶች</a></li>
+                        <li><a href="#upcoming">የወደፊት ትምህርቶች</a></li>
+                        <li><a href="teacher-advanced.html">መምህሮች</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><a href="javascript:testGenderRooms()">የወንድ/ሴት ክፍል</a></li>
+                        <li><a href="javascript:testVoiceClub()">Voice Club</a></li>
+                        <li><a href="whiteboard.html">Whiteboard</a></li>
+                        <li><a href="polls.html">Polls & Quizzes</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 መድረሰቱ ሰለፊያ. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase Config -->
     <script type="module" src="firebase-config.js"></script>
     
-    <!-- App.js will load after Firebase is ready -->
+    <!-- App Logic -->
     <script type="module">
-        // Wait 2 seconds for Firebase to fully initialize
         setTimeout(() => {
             import('./app.js');
-        }, 2000);
+        }, 1000);
+    </script>
+
+    <!-- Test Functions -->
+    <script>
+        // Test Gender Rooms
+        async function testGenderRooms() {
+            try {
+                console.log('🧪 Creating test stream for gender rooms...');
+                
+                // Wait for Firebase
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const streamRef = window.collection(window.db, 'streams');
+                const docRef = await window.addDoc(streamRef, {
+                    teacherId: 'test_teacher',
+                    teacherName: 'Test መምህር',
+                    title: 'Gender Rooms Test',
+                    category: 'quran',
+                    isLive: true,
+                    viewers: 0,
+                    createdAt: window.serverTimestamp()
+                });
+
+                const streamId = docRef.id;
+                console.log('✅ Test stream created:', streamId);
+
+                // Open gender rooms
+                location.href = 'gender-rooms.html?stream=' + streamId;
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error: ' + error.message + '\n\nFirebase might not be ready. Wait a moment and try again.');
+            }
+        }
+
+        // Test Voice Club
+        async function testVoiceClub() {
+            try {
+                console.log('🧪 Creating test voice room...');
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const roomRef = window.collection(window.db, 'voice-rooms');
+                const docRef = await window.addDoc(roomRef, {
+                    hostId: 'test_host',
+                    hostName: 'Test Host',
+                    title: 'Voice Club Test Room',
+                    description: 'Testing voice club features',
+                    category: 'hadith',
+                    agoraChannel: 'test_voice_' + Date.now(),
+                    appId: 'test_app_id',
+                    isLive: true,
+                    createdAt: window.serverTimestamp()
+                });
+
+                const roomId = docRef.id;
+                console.log('✅ Voice room created:', roomId);
+
+                location.href = 'voice-club.html?room=' + roomId;
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Test Whiteboard
+        function testWhiteboard() {
+            location.href = 'whiteboard.html';
+        }
+
+        // Test Polls
+        function testPolls() {
+            location.href = 'polls.html';
+        }
+
+        // Scroll to live section
+        function scrollToLive() {
+            document.getElementById('live').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Make functions global
+        window.testGenderRooms = testGenderRooms;
+        window.testVoiceClub = testVoiceClub;
+        window.testWhiteboard = testWhiteboard;
+        window.testPolls = testPolls;
+        window.scrollToLive = scrollToLive;
     </script>
 </body>
-</html
+</html>
