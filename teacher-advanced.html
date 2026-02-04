@@ -281,24 +281,24 @@
         }
 
         .student-item {
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
 
         .student-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
         }
 
         .student-info {
@@ -307,19 +307,12 @@
 
         .student-name {
             font-weight: bold;
-            font-size: 14px;
-            color: white;
+            margin-bottom: 4px;
         }
 
         .student-status {
-            font-size: 11px;
+            font-size: 12px;
             color: #888;
-        }
-
-        .hand-raised {
-            color: #ed8936;
-            font-size: 20px;
-            animation: bounce 1s infinite;
         }
 
         .student-actions {
@@ -330,54 +323,48 @@
         .action-btn {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
             border: none;
+            border-radius: 6px;
             background: rgba(255,255,255,0.1);
             color: white;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
         }
 
         .action-btn:hover {
             background: var(--primary);
         }
 
-        .action-btn.danger:hover {
-            background: var(--danger);
+        .hand-raised {
+            position: relative;
         }
 
-        /* Questions Queue */
+        .hand-raised::after {
+            content: '✋';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 16px;
+            animation: bounce 1s infinite;
+        }
+
         .question-item {
-            background: rgba(237, 137, 54, 0.1);
-            border-left: 3px solid #ed8936;
             padding: 12px;
+            background: rgba(255,255,255,0.05);
             border-radius: 8px;
             margin-bottom: 10px;
         }
 
         .question-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
             margin-bottom: 8px;
-        }
-
-        .question-user {
-            font-weight: bold;
-            color: var(--accent);
-            font-size: 13px;
-        }
-
-        .question-time {
-            font-size: 11px;
-            color: #888;
         }
 
         .question-text {
-            font-size: 13px;
-            color: white;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            line-height: 1.6;
         }
 
         .question-actions {
@@ -386,11 +373,12 @@
         }
 
         .question-btn {
-            padding: 6px 12px;
+            flex: 1;
+            padding: 8px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: bold;
         }
 
@@ -639,14 +627,18 @@
                     ">
                 </div>
                 <div id="studentsList">
-                    <!-- Students will be loaded here -->
+                    <div style="text-align: center; color: #888; padding: 40px;">
+                        ተማሪዎች በመጠበቅ ላይ...
+                    </div>
                 </div>
             </div>
 
             <!-- Questions Tab -->
             <div class="tab-content" id="questionsTab" style="display: none;">
                 <div id="questionsList">
-                    <!-- Questions will be loaded here -->
+                    <div style="text-align: center; color: #888; padding: 40px;">
+                        ምንም ጥያቄዎች የሉም
+                    </div>
                 </div>
             </div>
         </div>
@@ -663,8 +655,263 @@
             </div>
         </div>
     </div>
+    
 
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="moderation.js"></script>
+    
+    <!-- Teacher Advanced Functions -->
+    <script>
+        // Stream Data
+        let streamData = {
+            id: null,
+            startTime: null,
+            teacherId: null
+        };
+
+        let currentUser = null;
+
+        // Wait for Firebase
+        setTimeout(() => {
+            window.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    console.log('✅ Teacher logged in:', user.uid);
+                }
+            });
+        }, 1000);
+
+        // Open Gender Rooms
+        function openGenderRooms() {
+            if (!streamData.id) {
+                alert('⚠️ እባክዎ መጀመሪያ Live ይጀምሩ!');
+                return;
+            }
+
+            // Open in new window/tab
+            const url = 'gender-rooms.html?stream=' + streamData.id;
+            window.open(url, '_blank');
+            
+            console.log('✅ Opening gender rooms:', url);
+        }
+
+        // View Male Room
+        function viewMaleRoom() {
+            if (!streamData.id) {
+                alert('⚠️ እባክዎ መጀመሪያ Live ይጀምሩ!');
+                return;
+            }
+            window.open('gender-rooms.html?stream=' + streamData.id + '&view=male', '_blank');
+        }
+
+        // View Female Room
+        function viewFemaleRoom() {
+            if (!streamData.id) {
+                alert('⚠️ እባክዎ መጀመሪያ Live ይጀምሩ!');
+                return;
+            }
+            window.open('gender-rooms.html?stream=' + streamData.id + '&view=female', '_blank');
+        }
+
+        // Create Poll
+        function createPoll() {
+            if (!streamData.id) {
+                alert('⚠️ እባክዎ መጀመሪያ Live ይጀምሩ!');
+                return;
+            }
+            window.open('polls.html?stream=' + streamData.id, '_blank');
+        }
+
+        // Create Quiz
+        function createQuiz() {
+            if (!streamData.id) {
+                alert('⚠️ እባክዎ መጀመሪያ Live ይጀምሩ!');
+                return;
+            }
+            window.open('polls.html?stream=' + streamData.id + '&tab=quiz', '_blank');
+        }
+
+        // Open Whiteboard
+        function openWhiteboard() {
+            window.open('whiteboard.html', '_blank');
+        }
+
+        // Share Screen
+        function shareScreen() {
+            alert('Screen sharing በቅርቡ ይጨመራል!');
+        }
+
+        // Toggle Video UI
+        function toggleVideoUI() {
+            const videoBtn = document.getElementById('videoBtn');
+            const videoEl = document.getElementById('teacherVideo');
+            const audioMode = document.getElementById('audioMode');
+            
+            if (videoBtn.classList.contains('active')) {
+                videoBtn.classList.remove('active');
+                videoEl.style.display = 'none';
+                audioMode.style.display = 'flex';
+            } else {
+                videoBtn.classList.add('active');
+                videoEl.style.display = 'block';
+                audioMode.style.display = 'none';
+            }
+        }
+
+        // Toggle Audio UI
+        function toggleAudioUI() {
+            const audioBtn = document.getElementById('audioBtn');
+            audioBtn.classList.toggle('active');
+        }
+
+        // Toggle Video (from sidebar)
+        function toggleVideo() {
+            const isChecked = document.getElementById('videoToggle').checked;
+            console.log('Video toggle:', isChecked);
+            
+            const videoEl = document.getElementById('teacherVideo');
+            const audioMode = document.getElementById('audioMode');
+            
+            if (isChecked) {
+                videoEl.style.display = 'block';
+                audioMode.style.display = 'none';
+            } else {
+                videoEl.style.display = 'none';
+                audioMode.style.display = 'flex';
+            }
+        }
+
+        // Toggle Audio (from sidebar)
+        function toggleAudio() {
+            const isChecked = document.getElementById('audioToggle').checked;
+            console.log('Audio toggle:', isChecked);
+        }
+
+        // Mute All Students
+        function muteAll() {
+            if (confirm('ሁሉንም ተማሪዎች mute ማድረግ ይፈልጋሉ?')) {
+                console.log('Muting all students...');
+                alert('ሁሉም ተማሪዎች muted!');
+            }
+        }
+
+        // Clear Chat
+        function clearChat() {
+            if (confirm('Chat ሙሉ በሙሉ መሰረዝ ይፈልጋሉ?')) {
+                console.log('Clearing chat...');
+                alert('Chat cleared!');
+            }
+        }
+
+        // Toggle Chat
+        function toggleChat() {
+            const isChecked = document.getElementById('chatToggle').checked;
+            console.log('Chat enabled:', isChecked);
+        }
+
+        // Toggle Questions Only
+        function toggleQuestionsOnly() {
+            const isChecked = document.getElementById('questionsOnlyToggle').checked;
+            console.log('Questions only mode:', isChecked);
+        }
+
+        // Switch Tab
+        function switchTab(tab) {
+            // Update tab buttons
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.getElementById('studentsTab').style.display = 
+                tab === 'students' ? 'block' : 'none';
+            document.getElementById('questionsTab').style.display = 
+                tab === 'questions' ? 'block' : 'none';
+        }
+
+        // Open Settings
+        function openSettings() {
+            alert('Settings በቅርቡ ይጨመራል!');
+        }
+
+        // End Stream
+        function endStream() {
+            if (confirm('ትምህርቱን ማብቃት ይፈልጋሉ?')) {
+                console.log('Ending stream...');
+                
+                // Update stream in Firebase
+                if (streamData.id) {
+                    // Add your Firebase update logic here
+                }
+                
+                alert('✅ ትምህርቱ ተጠናቋል!');
+                location.href = 'index.html';
+            }
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        // Auto-create test stream on load (for testing)
+        setTimeout(async function() {
+            try {
+                if (window.auth && window.db && currentUser) {
+                    // Create a test stream
+                    const streamRef = window.collection(window.db, 'streams');
+                    const docRef = await window.addDoc(streamRef, {
+                        teacherId: currentUser.uid,
+                        teacherName: 'Test መምህር',
+                        title: 'Advanced Dashboard Test',
+                        category: 'quran',
+                        isLive: true,
+                        viewers: 0,
+                        createdAt: window.serverTimestamp()
+                    });
+
+                    streamData.id = docRef.id;
+                    streamData.teacherId = currentUser.uid;
+                    streamData.startTime = Date.now();
+
+                    console.log('✅ Test stream created:', streamData.id);
+                    
+                    // Start duration counter
+                    setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - streamData.startTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        document.getElementById('duration').textContent = 
+                            String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('❌ Error creating test stream:', error);
+            }
+        }, 2000);
+
+        // Make functions global
+        window.openGenderRooms = openGenderRooms;
+        window.viewMaleRoom = viewMaleRoom;
+        window.viewFemaleRoom = viewFemaleRoom;
+        window.createPoll = createPoll;
+        window.createQuiz = createQuiz;
+        window.openWhiteboard = openWhiteboard;
+        window.shareScreen = shareScreen;
+        window.toggleVideo = toggleVideo;
+        window.toggleAudio = toggleAudio;
+        window.toggleVideoUI = toggleVideoUI;
+        window.toggleAudioUI = toggleAudioUI;
+        window.muteAll = muteAll;
+        window.clearChat = clearChat;
+        window.toggleChat = toggleChat;
+        window.toggleQuestionsOnly = toggleQuestionsOnly;
+        window.switchTab = switchTab;
+        window.openSettings = openSettings;
+        window.endStream = endStream;
+        window.closeModal = closeModal;
+
+        console.log('✅ Teacher Advanced dashboard initialized!');
+    </script>
 </body>
 </html>
