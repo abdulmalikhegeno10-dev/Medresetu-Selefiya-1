@@ -74,17 +74,23 @@ window.onAuthStateChanged = onAuthStateChanged;
 console.log('🎉 Firebase fully configured and ready!');
 console.log('📊 Project: Medresetu Selefiya');
 
-// Enable offline persistence
-import { enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+// ✅ FIXED: Use proper cache settings instead of deprecated enableIndexedDbPersistence
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-enableIndexedDbPersistence(db)
-  .then(() => {
-    console.log('✅ Offline mode enabled!');
-  })
-  .catch((err) => {
-    if (err.code == 'failed-precondition') {
-      console.log('⚠️ Multiple tabs open');
-    } else if (err.code == 'unimplemented') {
-      console.log('⚠️ Browser does not support offline');
-    }
+try {
+  // Initialize Firestore with new cache settings
+  const firestoreDb = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
   });
+  
+  // Update global db reference
+  window.db = firestoreDb;
+  db = firestoreDb;
+  
+  console.log('✅ Offline mode enabled!');
+} catch (err) {
+  console.log('⚠️ Offline cache error:', err.message);
+  // Fallback to default Firestore if cache initialization fails
+}
